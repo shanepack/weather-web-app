@@ -230,7 +230,7 @@ import Image from 'next/image'
 
 export default function RectanglePage() {
   return (
-    <div className="relative flex items-center justify-center w-screen h-screen bg-[#99b5dc] rounded-[50px] overflow-hidden">
+    <div className="relative flex items-center justify-center w-screen h-screen bg-[#0B131E] rounded-[50px] overflow-hidden">
       <div className="absolute top-12 left-12 w-[800px] h-[400px] bg-[#202B3B] rounded-[50px]"></div>
     </div>
   );
