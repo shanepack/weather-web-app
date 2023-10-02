@@ -1,4 +1,4 @@
-import Moon1 from './icons/moon_1.svg'
+// import Moon1 from './icons/moon_1.svg'
 
 export default function RectanglePage() {
   return (
@@ -12,7 +12,7 @@ export default function RectanglePage() {
           <div className="absolute top-32 left-64 w-[900px] h-[350px] bg-[#000000] rounded-[50px]">
             <p className="text-white absolute top-12 left-12 font-bold text-7xl">Pearland</p>
             <p className="text-white absolute top-36 left-12 font-semibold text-5xl">110°</p>
-            <Moon1 priority src="/icons/moon_1.svg"></Moon1>
+            {/* <Moon1 priority src="/icons/moon_1.svg"></Moon1> */}
           </div>
           <div className="absolute bottom-20 left-64 w-[900px] h-[345px] bg-[#202B3B] rounded-[50px]"></div>
         </div>
