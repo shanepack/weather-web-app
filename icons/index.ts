@@ -1,0 +1,1 @@
+export { default as moon_1 } from './moon_1.svg'
