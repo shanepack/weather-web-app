@@ -1,0 +1,37 @@
+2023.10.06 21:36:16 INFO  Started: Metals version 1.0.1 in folders 'C:\Users\anony\Documents\GitHub\weather-web-app' for client Visual Studio Code 1.82.2.
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.license.VersionPrinter printVersionOnly
+INFO: Flyway Community Edition 9.21.2 by Redgate
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.license.VersionPrinter printVersion
+INFO: See release notes here: https://rd.gt/416ObMi
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.license.VersionPrinter printVersion
+INFO: 
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.FlywayExecutor execute
+INFO: Database: jdbc:h2:file:C:\Users\anony\Documents\GitHub\weather-web-app\.metals\metals (H2 2.1)
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory allAppliedMigrations
+INFO: Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.command.DbValidate validate
+INFO: Successfully validated 4 migrations (execution time 00:00.028s)
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory create
+INFO: Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.command.DbMigrate migrateGroup
+INFO: Current version of schema "PUBLIC": << Empty Schema >>
+Oct 06, 2023 9:36:16 PM org.flywaydb.core.internal.command.DbMigrate doMigrateGroup
+INFO: Migrating schema "PUBLIC" to version "1 - Create tables"
+Oct 06, 2023 9:36:17 PM org.flywaydb.core.internal.command.DbMigrate doMigrateGroup
+INFO: Migrating schema "PUBLIC" to version "2 - Server discovery"
+Oct 06, 2023 9:36:17 PM org.flywaydb.core.internal.command.DbMigrate doMigrateGroup
+INFO: Migrating schema "PUBLIC" to version "3 - Jar symbols"
+Oct 06, 2023 9:36:17 PM org.flywaydb.core.internal.command.DbMigrate doMigrateGroup
+INFO: Migrating schema "PUBLIC" to version "4 - Fingerprints"
+Oct 06, 2023 9:36:17 PM org.flywaydb.core.internal.command.DbMigrate logSummary
+INFO: Successfully applied 4 migrations to schema "PUBLIC", now at version v4 (execution time 00:00.029s)
+2023.10.06 21:36:17 INFO  time: initialize in 0.72s
+2023.10.06 21:36:21 WARN  Build server is not auto-connectable.
+2023.10.06 21:36:21 WARN  no build tool detected in workspace 'C:\Users\anony\Documents\GitHub\weather-web-app'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+Oct 06, 2023 9:36:47 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+Oct 06, 2023 9:36:57 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+2023.10.06 21:37:01 INFO  Shutting down server
+2023.10.06 21:37:01 INFO  shutting down Metals
+2023.10.06 21:37:01 INFO  Exiting server
