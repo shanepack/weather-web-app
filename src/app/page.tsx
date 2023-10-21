@@ -1,24 +1,128 @@
-// import Moon1 from './icons/moon_1.svg'
+// // import Moon1 from './icons/moon_1.svg'
+
+// export default function RectanglePage() {
+//   return (
+//     <div className="relative flex items-center justify-center w-screen h-screen bg-[#0B131E] rounded-[50px] overflow-hidden">
+//       <div className="grid grid-flow-col grid-rows-3 grid-cols-3 gap-8">
+//         <div className="col-start-1">
+//           <div className="absolute top-12 left-12 w-[150px] h-[800px] bg-[#202B3B] rounded-[50px]"></div>
+//         </div>
+//         <div className="col-start-2">
+//           <div className="absolute top-12 left-64 w-[900px] h-[50px] bg-[#202B3B] rounded-[50px]"></div>
+//           <div className="absolute top-32 left-64 w-[900px] h-[350px] bg-[#000000] rounded-[50px]">
+//             <p className="text-white absolute top-12 left-12 font-bold text-7xl">Pearland</p>
+//             <p className="text-white absolute top-36 left-12 font-semibold text-5xl">110°</p>
+//             {/* <Moon1 priority src="/icons/moon_1.svg"></Moon1> */}
+//           </div>
+//           <div className="absolute bottom-20 left-64 w-[900px] h-[345px] bg-[#202B3B] rounded-[50px]"></div>
+//         </div>
+//         <div className="col-start-3">
+//           <div className="absolute top-12 right-12 w-[650px] h-[300px] bg-[#202B3B] rounded-[50px]"></div>
+//           <div className="absolute bottom-20 right-12 w-[650px] h-[475px] bg-[#202B3B] rounded-[50px]"></div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+"use client";
+import { useState, useEffect } from 'react';
+import {InputUserLocation} from './scripts.js';
+import axios from 'axios';
 
 export default function RectanglePage() {
+  
+  const [userLocation, setUserLocation] = useState('Pearland');
+
+  // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     sendLocationToPython();
+  //   }
+  // };
+
+  // const sendLocationToPython = async () => {
+  //   try {
+  //     console.log('-----Sending data to python-----');
+  //     const encodedLocation = encodeURIComponent(userLocation);
+  //     const response = await axios.post('/', { userLocation: encodedLocation });
+  //     console.log('-----Returned-----');
+      
+  //   } catch (error) {
+  //     console.error('Error sending data to Python:', error);
+  //   }
+  // };
+
+  useEffect(() => {
+    InputUserLocation(setUserLocation);
+  }, []);
+  
   return (
-    <div className="relative flex items-center justify-center w-screen h-screen bg-[#0B131E] rounded-[50px] overflow-hidden">
-      <div className="grid grid-flow-col grid-rows-3 grid-cols-3 gap-8">
-        <div className="col-start-1">
-          <div className="absolute top-12 left-12 w-[150px] h-[800px] bg-[#202B3B] rounded-[50px]"></div>
+    <div className="bg-gray-800 h-screen w-screen grid grid-cols-[auto,1fr] p-8 gap-8">
+      {/* Settings sidebar */}
+      <div className="bg-gray-700 flex flex-col justify-between p-8 rounded-[20px] w-[120px]">
+        <button className="bg-gray-600 p-2 text-white  mb-2">
+          Home
+        </button>
+        <button className="bg-gray-600 p-2 text-white  mb-2">
+          List
+        </button>
+        <button className="bg-gray-600 p-2 text-white ">
+          Settings
+        </button>
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-col">
+        {/* Top bar */}
+        <div className="flex justify-between items-center mb-8">
+          <input
+            type="text"
+            id="locationInput"
+            placeholder="Search for a City..."
+            className="p-2 bg-gray-700 rounded-[20px] text-white focus:outline-none focus:border-white"
+            //onKeyDown={handleKeyPress}
+          />
+          <p className="text-white text-2xl">8:00PM</p>
         </div>
-        <div className="col-start-2">
-          <div className="absolute top-12 left-64 w-[900px] h-[50px] bg-[#202B3B] rounded-[50px]"></div>
-          <div className="absolute top-32 left-64 w-[900px] h-[350px] bg-[#000000] rounded-[50px]">
-            <p className="text-white absolute top-12 left-12 font-bold text-7xl">Pearland</p>
-            <p className="text-white absolute top-36 left-12 font-semibold text-5xl">110°</p>
-            {/* <Moon1 priority src="/icons/moon_1.svg"></Moon1> */}
+
+        <div className="flex-1 grid grid-cols-2 gap-8">
+        {/* Main Left section */}
+        <div className="grid grid-rows-3 gap-8">
+            {/* City, Temperature & Today's Forecast */}
+            <div className="bg-black p-8 rounded-[20px] flex flex-col justify-between row-span-2">
+                <div>
+                    <p className="text-white text-4xl mb-2">{userLocation}</p>
+                    <p className="text-white text-6xl">110°</p>
+                </div>
+
+                <div className="bg-[#0C1117] p-8 rounded-[20px]">
+                    <p className="text-white text-2xl">TODAY'S FORECAST</p>
+                </div>
+            </div>
+
+            {/* Air Conditions */}
+            <div className="bg-gray-700 p-8 rounded-[20px]">
+                <p className="text-white text-2xl">AIR CONDITIONS</p>
+            </div>
+        </div>
+
+          {/* Main Right section */}
+          <div className="grid grid-rows-2 gap-8">
+            {/* ChatGPT block */}
+            <div className="bg-white p-6 rounded-[20px] min-h-[300px]"> {/* Use the desired value in place of 300px */}
+              <p className="text-gray-800 mb-2" style={{ fontSize: 'clamp(0.8rem, 3vw, 2rem)' }}>
+                This evening in Pearland, Independence Park is open until 10:00 PM and offers a nice late-night option for a peaceful walk or some stargazing in a park setting.
+              </p>
+              <p className="text-gray-600 text-right text-sm">
+                Suggestion Generated by ChatGPT
+              </p>
+            </div>
+
+            {/* 7 Day Forecast */}
+            <div className="bg-gray-700 p-8 rounded-[20px] min-h-[300px]"> {/* Use the desired value in place of 300px */}
+              <p className="text-white text-2xl">7 DAY FORECAST</p>
+            </div>
           </div>
-          <div className="absolute bottom-20 left-64 w-[900px] h-[345px] bg-[#202B3B] rounded-[50px]"></div>
-        </div>
-        <div className="col-start-3">
-          <div className="absolute top-12 right-12 w-[650px] h-[300px] bg-[#202B3B] rounded-[50px]"></div>
-          <div className="absolute bottom-20 right-12 w-[650px] h-[475px] bg-[#202B3B] rounded-[50px]"></div>
         </div>
       </div>
     </div>
