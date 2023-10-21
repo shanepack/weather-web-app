@@ -8,12 +8,15 @@ def load_api_key(secrets_file="secrets.json"):
 
 api_key = load_api_key()
 
+content = input("User: ")
+
 openai.api_key = api_key
 
 completion = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[
-        {"role": "user", "content": "it's going to be sunny and warm in Houston Texas tomorrow. can you provide me with some outdoor activity recommendations?"}
+        {"role": "user", "content": content}
 	]
 )
-print(completion.choices[0].message.content)
+chat_response = completion.choices[0].message.content
+print(f'ChatGPT: {chat_response}')
