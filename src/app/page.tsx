@@ -1,30 +1,3 @@
-// // import Moon1 from './icons/moon_1.svg'
-
-// export default function RectanglePage() {
-//   return (
-//     <div className="relative flex items-center justify-center w-screen h-screen bg-[#0B131E] rounded-[50px] overflow-hidden">
-//       <div className="grid grid-flow-col grid-rows-3 grid-cols-3 gap-8">
-//         <div className="col-start-1">
-//           <div className="absolute top-12 left-12 w-[150px] h-[800px] bg-[#202B3B] rounded-[50px]"></div>
-//         </div>
-//         <div className="col-start-2">
-//           <div className="absolute top-12 left-64 w-[900px] h-[50px] bg-[#202B3B] rounded-[50px]"></div>
-//           <div className="absolute top-32 left-64 w-[900px] h-[350px] bg-[#000000] rounded-[50px]">
-//             <p className="text-white absolute top-12 left-12 font-bold text-7xl">Pearland</p>
-//             <p className="text-white absolute top-36 left-12 font-semibold text-5xl">110°</p>
-//             {/* <Moon1 priority src="/icons/moon_1.svg"></Moon1> */}
-//           </div>
-//           <div className="absolute bottom-20 left-64 w-[900px] h-[345px] bg-[#202B3B] rounded-[50px]"></div>
-//         </div>
-//         <div className="col-start-3">
-//           <div className="absolute top-12 right-12 w-[650px] h-[300px] bg-[#202B3B] rounded-[50px]"></div>
-//           <div className="absolute bottom-20 right-12 w-[650px] h-[475px] bg-[#202B3B] rounded-[50px]"></div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 import { useState, useEffect } from 'react';
 import {InputUserLocation} from './scripts.js';
@@ -33,6 +6,10 @@ import axios from 'axios';
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
+  const [showHome, setHomePage] = useState(true);
+  const [showList, setListPage] = useState(false);
+  const [showSettings, setSettingsPage] = useState(false);
+  const [previousLocations, setPreviousLocations] = useState<string[]>([]);
 
   // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
   //   if (e.key === 'Enter') {
@@ -53,25 +30,69 @@ export default function RectanglePage() {
   // };
 
   useEffect(() => {
+    InputUserLocation((userLocation : string) => {
+        setPreviousLocations((prevLocations) => [userLocation, ...prevLocations]);
+    });
+}, []);
+
+  useEffect(() => {
     InputUserLocation(setUserLocation);
   }, []);
+
+  const toggleHome = () => {
+    if (!showHome) {
+      setHomePage(true);
+      setListPage(false);
+      setSettingsPage(false);
+    }
+  };
+
+  const toggleList = () => {
+    if (!showList) {
+      setHomePage(false);
+      setListPage(true);
+      setSettingsPage(false);
+    }
+  };
+
+  const toggleSettings = () => {
+    if (!showSettings) {
+      setHomePage(false);
+      setListPage(false);
+      setSettingsPage(true);
+    }
+  };
   
   return (
     <div className="bg-gray-800 h-screen w-screen grid grid-cols-[auto,1fr] p-8 gap-8">
       {/* Settings sidebar */}
       <div className="bg-gray-700 flex flex-col justify-between p-8 rounded-[20px] w-[120px]">
-        <button className="bg-gray-600 p-2 text-white  mb-2">
-          Home
+        <button className={`bg-gray-600 p-6 text-white mb-2 ${showHome ? 'active' : ''}`} onClick={toggleHome}>
+          H
+          O
+          M
+          E
         </button>
-        <button className="bg-gray-600 p-2 text-white  mb-2">
-          List
+        <button className={`bg-gray-600 p-6 text-white mb-2 ${showList ? 'active' : ''}`} onClick={toggleList}>
+          L
+          I
+          S
+          T
         </button>
-        <button className="bg-gray-600 p-2 text-white ">
-          Settings
+        <button className={`bg-gray-600 p-6 text-white ${showSettings ? 'active' : ''}`} onClick={toggleSettings}>
+          S
+          E
+          T
+          T
+          I
+          N
+          G
+          S
         </button>
       </div>
 
       {/* Main content */}
+      {showHome && (
       <div className="flex flex-col">
         {/* Top bar */}
         <div className="flex justify-between items-center mb-8">
@@ -125,6 +146,63 @@ export default function RectanglePage() {
           </div>
         </div>
       </div>
+      )}
+
+      {/* List Page */}
+      {showList && (
+      <div className="grid grid-cols-1 grid-rows-1 gap-8">
+        <div className="grid grid-rows-1 gap-8">
+          <div className="bg-gray-700 p-8 rounded-[20px] min-h-[100px]">
+            <p className="text-white text-4xl mb-4">Previous Locations</p>
+            <p>
+                {previousLocations.map((location, index) => (
+                    <li key={index} className="text-white text-sm">
+                        {location}
+                    </li>
+                ))}
+            </p>
+          </div>
+        </div>
+      </div>
+      )}
+
+      {/* Setting Page */}
+      {showSettings && (
+      <div className="grid grid-cols-1 grid-rows-1 gap-8">
+        <div className="grid grid-rows-1 gap-8">
+          <div className="bg-gray-700 p-8 rounded-[20px] min-h-[100px]">
+            <p className="text-white text-4xl mb-4">Appearance</p>
+            <div className="inline-flex rounded-md shadow-sm mb-4">
+              <a href="#" className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white" aria-current="page">
+                Dark
+              </a>
+              <a href="#" className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b">
+                Light
+              </a>
+            </div>
+            <p className="text-white text-4xl mb-4">Units</p>
+            <p className="text-gray-300 text-2xl mb-4">Temperature</p>
+            <div className="inline-flex rounded-md shadow-sm mb-4">
+              <a href="#" className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white" aria-current="page">
+                Fahrenheit
+              </a>
+              <a href="#" className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b">
+                Celsius
+              </a>
+            </div>
+            <p className="text-gray-300 text-2xl mb-4">Wind Speed</p>
+            <div className="inline-flex rounded-md shadow-sm mb-4">
+              <a href="#" className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white" aria-current="page">
+                m/s
+              </a>
+              <a href="#" className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b">
+                km/h
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
     </div>
   );
 }
