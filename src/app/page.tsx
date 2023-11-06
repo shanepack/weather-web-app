@@ -80,16 +80,19 @@ type WeatherData = {
   city: string;
   temp: string;
   description: string;
+  local_time?: string;
 };
 
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
-  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '' });
+  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined });
   const [previousLocations, setPreviousLocations] = useState<string[]>([]);
   const [showHome, setHomePage] = useState(true);
   const [showList, setListPage] = useState(false);
   const [showSettings, setSettingsPage] = useState(false);
+  const [units, setUnit] = useState('metric'); // or 'imperial' for Fahrenheit
+  const [localTime, setLocalTime] = useState<Date | null>(null);
 
   const locationInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,26 +103,48 @@ export default function RectanglePage() {
         const newLocation = input.value;
         setUserLocation(newLocation);
         setPreviousLocations((prevLocations) => [newLocation, ...prevLocations]);
-        await fetchWeatherData(newLocation);
+        await fetchWeatherData(newLocation, units);
       }
     }
   };
 
-  const fetchWeatherData = async (location: string) => {
+  const fetchWeatherData = async (location: string, units: string, updateTime: boolean = true) => {
     try {
-      const response = await axios.post(`http://localhost:5328/api/weather`, { userLocation: location });
-      setWeatherData({
-        city: response.data.city,
-        temp: response.data.temp,
-        description: '' // You need to handle the description if you want to include it
+      const response = await axios.post(`http://localhost:5328/api/weather`, { userLocation: location, units });
+      // Convert string to float and then round it
+      const roundedTemp = Math.round(parseFloat(response.data.temp));
+      setWeatherData((currentData) => {
+        return {
+          ...currentData, // Spread operator to copy all current weatherData state values
+          city: response.data.city,
+          temp: roundedTemp.toString(), // Convert back to string if needed
+          description: response.data.description,
+          // Only update the time if updateTime is true
+          local_time: updateTime ? response.data.local_time : currentData.local_time,
+        };
       });
     } catch (error) {
       console.error('Error fetching weather data:', error);
     }
   };
+  
+
+  const getUnitSymbol = (units: string) => {
+    return units === 'metric' ? 'C' : 'F';
+  };
 
   useEffect(() => {
-    fetchWeatherData(userLocation);
+    fetchWeatherData(userLocation, units);
+  }, [userLocation, units]);
+
+  useEffect(() => {
+    // Update local time every minute
+    const intervalId = setInterval(() => {
+      setLocalTime(new Date()); // Update to the current time
+    }, 60000); // Update every minute
+  
+    // Clear the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const toggleHome = () => {
@@ -146,6 +171,17 @@ export default function RectanglePage() {
     }
   };
   
+    // This function will be called when the user clicks on the Fahrenheit link
+    const selectFahrenheit = () => {
+      setUnit('imperial');
+      fetchWeatherData(userLocation, 'imperial'); // Fetch new weather data with Fahrenheit unit
+    };
+  
+    // This function will be called when the user clicks on the Celsius link
+    const selectCelsius = () => {
+      setUnit('metric');
+      fetchWeatherData(userLocation, 'metric'); // Fetch new weather data with Celsius unit
+    };
   return (
     <div className="bg-gray-800 h-screen w-screen grid grid-cols-[auto,1fr] p-8 gap-8">
       {/* Settings sidebar */}
@@ -187,7 +223,13 @@ export default function RectanglePage() {
             className="p-2 bg-gray-700 rounded-[20px] text-white focus:outline-none focus:border-white"
             onKeyDown={handleKeyDown}
           />
-          <p className="text-white text-2xl">8:00PM</p>
+        <p className="text-white text-2xl">
+        {weatherData.local_time ? new Date(weatherData.local_time).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        }) : 'Loading time...'}
+      </p>
         </div>
 
         <div className="flex-1 grid grid-cols-2 gap-8">
@@ -197,7 +239,7 @@ export default function RectanglePage() {
             <div className="bg-black p-8 rounded-[20px] flex flex-col justify-between row-span-2">
                 <div>
                     <p className="text-white text-4xl mb-2">{weatherData.city}</p> 
-                    <p className="text-white text-6xl">{weatherData.temp ? `${weatherData.temp}°` : ''}</p> 
+                    <p className="text-white text-6xl">{weatherData.temp ? `${weatherData.temp}°${getUnitSymbol(units)}` : ''}</p> 
                 </div>
 
                 <div className="bg-[#0C1117] p-8 rounded-[20px]">
@@ -266,14 +308,30 @@ export default function RectanglePage() {
             </div>
             <p className="text-white text-4xl mb-4">Units</p>
             <p className="text-gray-300 text-2xl mb-4">Temperature</p>
-            <div className="inline-flex rounded-md shadow-sm mb-4">
+            {/* <div className="inline-flex rounded-md shadow-sm mb-4">
               <a href="#" className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white" aria-current="page">
                 Fahrenheit
               </a>
               <a href="#" className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b">
                 Celsius
               </a>
-            </div>
+            </div> */}
+                <div className="inline-flex rounded-md shadow-sm mb-4">
+      {/* Fahrenheit link */}
+      <button
+        onClick={selectFahrenheit}
+        className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
+      >
+        Fahrenheit
+      </button>
+      {/* Celsius link */}
+      <button
+        onClick={selectCelsius}
+        className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b"
+      >
+        Celsius
+      </button>
+    </div>
             <p className="text-gray-300 text-2xl mb-4">Wind Speed</p>
             <div className="inline-flex rounded-md shadow-sm mb-4">
               <a href="#" className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white" aria-current="page">
