@@ -107,7 +107,7 @@ export default function RectanglePage() {
 
   const fetchWeatherData = async (location: string) => {
     try {
-      const response = await axios.get(`http://localhost:5328/api?location=${location}`);
+      const response = await axios.post(`http://localhost:5328/api/weather`, { userLocation: location });
       setWeatherData({
         city: response.data.city,
         temp: response.data.temp,
