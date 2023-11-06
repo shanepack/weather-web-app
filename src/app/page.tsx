@@ -74,28 +74,53 @@
 
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+
+type WeatherData = {
+  city: string;
+  temp: string;
+  description: string;
+};
 
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
+  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '' });
+  const [previousLocations, setPreviousLocations] = useState<string[]>([]);
   const [showHome, setHomePage] = useState(true);
   const [showList, setListPage] = useState(false);
   const [showSettings, setSettingsPage] = useState(false);
-  const [previousLocations, setPreviousLocations] = useState<string[]>([]);
 
- 
   const locationInputRef = useRef<HTMLInputElement>(null);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       const input = locationInputRef.current;
       if (input) {
-        const userLocation = input.value;
-        setUserLocation(userLocation);
-        setPreviousLocations((prevLocations) => [userLocation, ...prevLocations]);
+        const newLocation = input.value;
+        setUserLocation(newLocation);
+        setPreviousLocations((prevLocations) => [newLocation, ...prevLocations]);
+        await fetchWeatherData(newLocation);
       }
     }
   };
+
+  const fetchWeatherData = async (location: string) => {
+    try {
+      const response = await axios.get(`http://localhost:5328/api?location=${location}`);
+      setWeatherData({
+        city: response.data.city,
+        temp: response.data.temp,
+        description: '' // You need to handle the description if you want to include it
+      });
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWeatherData(userLocation);
+  }, []);
 
   const toggleHome = () => {
     if (!showHome) {
@@ -157,11 +182,12 @@ export default function RectanglePage() {
           <input
             type="text"
             id="locationInput"
+            ref={locationInputRef}
             placeholder="Search for a City..."
             className="p-2 bg-gray-700 rounded-[20px] text-white focus:outline-none focus:border-white"
-            //onKeyDown={handleKeyPress}
+            onKeyDown={handleKeyDown}
           />
-          <p className="text-white text-2xl">8:00PM</p> //TEMP SOLUTION: FIX WITH OPENWEATHER API
+          <p className="text-white text-2xl">8:00PM</p>
         </div>
 
         <div className="flex-1 grid grid-cols-2 gap-8">
@@ -170,8 +196,8 @@ export default function RectanglePage() {
             {/* City, Temperature & Today's Forecast */}
             <div className="bg-black p-8 rounded-[20px] flex flex-col justify-between row-span-2">
                 <div>
-                    <p className="text-white text-4xl mb-2">{userLocation}</p> //TEMP SOLUTION: FIX WITH OPENWEATHER API
-                    <p className="text-white text-6xl">110°</p> //TEMP SOLUTION: FIX WITH OPENWEATHER API
+                    <p className="text-white text-4xl mb-2">{weatherData.city}</p> 
+                    <p className="text-white text-6xl">{weatherData.temp ? `${weatherData.temp}°` : ''}</p> 
                 </div>
 
                 <div className="bg-[#0C1117] p-8 rounded-[20px]">
