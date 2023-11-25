@@ -66,3 +66,7 @@ def send_location():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5328, debug=True)
+
+# pip install --upgrade Werkzeug
+# pip install --upgrade Flask
+# pip install --upgrade pip

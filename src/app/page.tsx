@@ -1,10 +1,7 @@
 "use client";
-import { useState, useEffect } from 'react';
-import {InputUserLocation} from './scripts.js';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-<<<<<<< Updated upstream
-=======
 // Define the structure for the weather data
 type WeatherData = {
   city: string;
@@ -18,16 +15,9 @@ type WeatherData = {
 };
 
 // The main component for the weather app page
->>>>>>> Stashed changes
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
-<<<<<<< Updated upstream
-  const [showHome, setHomePage] = useState(true);
-  const [showList, setListPage] = useState(false);
-  const [showSettings, setSettingsPage] = useState(false);
-  const [previousLocations, setPreviousLocations] = useState<string[]>([]);
-=======
   const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined, feels_like: '', wind: '', temp_high: '', temp_low: ''});
   const [previousLocations, setPreviousLocations] = useState<string[]>([]);
   const [showHome, setHomePage] = useState(true);
@@ -35,27 +25,9 @@ export default function RectanglePage() {
   const [showSettings, setSettingsPage] = useState(false);
   const [units, setUnit] = useState('imperial'); // or 'imperial' for Fahrenheit
   const [localTime, setLocalTime] = useState<Date | null>(null);
->>>>>>> Stashed changes
 
-  // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === 'Enter') {
-  //     sendLocationToPython();
-  //   }
-  // };
+  const locationInputRef = useRef<HTMLInputElement>(null);
 
-<<<<<<< Updated upstream
-  // const sendLocationToPython = async () => {
-  //   try {
-  //     console.log('-----Sending data to python-----');
-  //     const encodedLocation = encodeURIComponent(userLocation);
-  //     const response = await axios.post('/', { userLocation: encodedLocation });
-  //     console.log('-----Returned-----');
-      
-  //   } catch (error) {
-  //     console.error('Error sending data to Python:', error);
-  //   }
-  // };
-=======
   const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       const input = locationInputRef.current;
@@ -98,7 +70,6 @@ export default function RectanglePage() {
   const getUnitSymbol = (units: string) => {
     return units === 'metric' ? 'C' : 'F';
   };
->>>>>>> Stashed changes
 
   // meters per second or miles per hour
   const getUnitSymbol2 = (units: string) => {
@@ -106,13 +77,17 @@ export default function RectanglePage() {
   }
 
   useEffect(() => {
-    InputUserLocation((userLocation : string) => {
-        setPreviousLocations((prevLocations) => [userLocation, ...prevLocations]);
-    });
-}, []);
+    fetchWeatherData(userLocation, units);
+  }, [userLocation, units]);
 
   useEffect(() => {
-    InputUserLocation(setUserLocation);
+    // Update local time every minute
+    const intervalId = setInterval(() => {
+      setLocalTime(new Date()); // Update to the current time
+    }, 60000); // Update every minute
+  
+    // Clear the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const toggleHome = () => {
@@ -139,6 +114,18 @@ export default function RectanglePage() {
     }
   };
   
+  // This function will be called when the user clicks on the Fahrenheit link
+  const selectFahrenheit = () => {
+    setUnit('imperial');
+    fetchWeatherData(userLocation, 'imperial'); // Fetch new weather data with Fahrenheit unit
+  };
+
+  // This function will be called when the user clicks on the Celsius link
+  const selectCelsius = () => {
+    setUnit('metric');
+    fetchWeatherData(userLocation, 'metric'); // Fetch new weather data with Celsius unit
+  };
+
   return (
     <div className="bg-gray-800 h-screen w-screen grid grid-cols-[auto,1fr] p-8 gap-8">
       {/* Settings sidebar */}
@@ -177,7 +164,7 @@ export default function RectanglePage() {
             id="locationInput"
             placeholder="Search for a City..."
             className="p-2 bg-gray-700 rounded-[20px] text-white focus:outline-none focus:border-white"
-            //onKeyDown={handleKeyPress}
+            onKeyDown={handleKeyDown}
           />
           <p className="text-white text-2xl">8:00PM</p>
         </div>
@@ -188,15 +175,10 @@ export default function RectanglePage() {
             {/* City, Temperature & Today's Forecast */}
             <div className="bg-black p-8 rounded-[20px] flex flex-col justify-between row-span-2">
                 <div>
-<<<<<<< Updated upstream
-                    <p className="text-white text-4xl mb-2">{userLocation}</p>
-                    <p className="text-white text-6xl">110°</p>
-=======
                     <p className="text-white text-4xl mb-2">{weatherData.city}</p> 
                     <p className="text-white text-6xl mb-6">{weatherData.temp ? `${weatherData.temp}°${getUnitSymbol(units)}` : ''}</p>
                     <p className="text-white text-2x1 ml-2">{weatherData.temp_high ? `High: ${weatherData.temp_high}°${getUnitSymbol(units)}` : ''}</p>
                     <p className="text-white text-2x1 ml-2">{weatherData.temp_low ? `Low: ${weatherData.temp_low}°${getUnitSymbol(units)}` : ''}</p> 
->>>>>>> Stashed changes
                 </div>
 
                 <div className="bg-[#0C1117] p-8 rounded-[20px]">
@@ -284,12 +266,20 @@ export default function RectanglePage() {
             <p className="text-white text-4xl mb-4">Units</p>
             <p className="text-gray-300 text-2xl mb-4">Temperature</p>
             <div className="inline-flex rounded-md shadow-sm mb-4">
-              <a href="#" className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white" aria-current="page">
+              {/* Fahrenheit link */}
+              <button
+                onClick={selectFahrenheit}
+                className="px-16 py-8 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
+              >
                 Fahrenheit
-              </a>
-              <a href="#" className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b">
+              </button>
+              {/* Celsius link */}
+              <button
+                onClick={selectCelsius}
+                className="px-16 py-8 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white border-t border-b"
+              >
                 Celsius
-              </a>
+              </button>
             </div>
             <p className="text-gray-300 text-2xl mb-4">Wind Speed</p>
             <div className="inline-flex rounded-md shadow-sm mb-4">
