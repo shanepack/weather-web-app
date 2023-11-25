@@ -3,13 +3,39 @@ import { useState, useEffect } from 'react';
 import {InputUserLocation} from './scripts.js';
 import axios from 'axios';
 
+<<<<<<< Updated upstream
+=======
+// Define the structure for the weather data
+type WeatherData = {
+  city: string;
+  temp: string;
+  description: string;
+  local_time?: string;
+  feels_like: string;
+  wind: string;
+  temp_high: string;
+  temp_low: string;
+};
+
+// The main component for the weather app page
+>>>>>>> Stashed changes
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
+<<<<<<< Updated upstream
   const [showHome, setHomePage] = useState(true);
   const [showList, setListPage] = useState(false);
   const [showSettings, setSettingsPage] = useState(false);
   const [previousLocations, setPreviousLocations] = useState<string[]>([]);
+=======
+  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined, feels_like: '', wind: '', temp_high: '', temp_low: ''});
+  const [previousLocations, setPreviousLocations] = useState<string[]>([]);
+  const [showHome, setHomePage] = useState(true);
+  const [showList, setListPage] = useState(false);
+  const [showSettings, setSettingsPage] = useState(false);
+  const [units, setUnit] = useState('imperial'); // or 'imperial' for Fahrenheit
+  const [localTime, setLocalTime] = useState<Date | null>(null);
+>>>>>>> Stashed changes
 
   // const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
   //   if (e.key === 'Enter') {
@@ -17,6 +43,7 @@ export default function RectanglePage() {
   //   }
   // };
 
+<<<<<<< Updated upstream
   // const sendLocationToPython = async () => {
   //   try {
   //     console.log('-----Sending data to python-----');
@@ -28,6 +55,55 @@ export default function RectanglePage() {
   //     console.error('Error sending data to Python:', error);
   //   }
   // };
+=======
+  const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      const input = locationInputRef.current;
+      if (input) {
+        const newLocation = input.value;
+        setUserLocation(newLocation);
+        setPreviousLocations((prevLocations) => [newLocation, ...prevLocations]);
+        await fetchWeatherData(newLocation, units);
+      }
+    }
+  };
+
+  const fetchWeatherData = async (location: string, units: string, updateTime: boolean = true) => {
+    try {
+      const response = await axios.post(`http://localhost:5328/api/weather`, { userLocation: location, units });
+      // Convert string to float and then round it
+      const roundedTemp = Math.round(parseFloat(response.data.temp));
+      const roundedFeels_Like = Math.round(parseFloat(response.data.feels_like));
+      const roundedTemp_High = Math.round(parseFloat(response.data.temp_high));
+      const roundedTemp_Low = Math.round(parseFloat(response.data.temp_low));
+      setWeatherData((currentData) => {
+        return {
+          ...currentData, // Spread operator to copy all current weatherData state values
+          city: response.data.city,
+          temp: roundedTemp.toString(), // Convert back to string if needed
+          description: response.data.description,
+          local_time: updateTime ? response.data.local_time : currentData.local_time, // Only update the time if updateTime is true
+          feels_like: roundedFeels_Like.toString(),
+          wind: response.data.wind,
+          temp_high: roundedTemp_High.toString(),
+          temp_low: roundedTemp_Low.toString(),
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  };
+  
+  // celsius or fahrenheit
+  const getUnitSymbol = (units: string) => {
+    return units === 'metric' ? 'C' : 'F';
+  };
+>>>>>>> Stashed changes
+
+  // meters per second or miles per hour
+  const getUnitSymbol2 = (units: string) => {
+    return units === 'metric' ? ' M/S' : ' MPH'
+  }
 
   useEffect(() => {
     InputUserLocation((userLocation : string) => {
@@ -112,8 +188,15 @@ export default function RectanglePage() {
             {/* City, Temperature & Today's Forecast */}
             <div className="bg-black p-8 rounded-[20px] flex flex-col justify-between row-span-2">
                 <div>
+<<<<<<< Updated upstream
                     <p className="text-white text-4xl mb-2">{userLocation}</p>
                     <p className="text-white text-6xl">110°</p>
+=======
+                    <p className="text-white text-4xl mb-2">{weatherData.city}</p> 
+                    <p className="text-white text-6xl mb-6">{weatherData.temp ? `${weatherData.temp}°${getUnitSymbol(units)}` : ''}</p>
+                    <p className="text-white text-2x1 ml-2">{weatherData.temp_high ? `High: ${weatherData.temp_high}°${getUnitSymbol(units)}` : ''}</p>
+                    <p className="text-white text-2x1 ml-2">{weatherData.temp_low ? `Low: ${weatherData.temp_low}°${getUnitSymbol(units)}` : ''}</p> 
+>>>>>>> Stashed changes
                 </div>
 
                 <div className="bg-[#0C1117] p-8 rounded-[20px]">
@@ -123,7 +206,25 @@ export default function RectanglePage() {
 
             {/* Air Conditions */}
             <div className="bg-gray-700 p-8 rounded-[20px]">
-                <p className="text-white text-2xl">AIR CONDITIONS</p>
+                <p className="text-white text-2xl mb-10">AIR CONDITIONS</p>
+                <div className="grid grid-cols-4 gap-8">  
+                  <div className="flex flex-col items-center">
+                    <p className="text-White text8x1 mb-2">Feels Like</p>
+                    <p className="text-white text-3xl">{weatherData.feels_like ? `${weatherData.feels_like}°${getUnitSymbol(units)}` : ''}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p className="text-White text8x1 mb-2">Change of Rain</p>
+                    <p className="text-white text-3xl">{weatherData.feels_like ? `${weatherData.feels_like}°${getUnitSymbol(units)}` : ''}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p className="text-White text8x1 mb-2">Wind</p>
+                    <p className="text-white text-3xl">{weatherData.wind ? `${weatherData.wind}${getUnitSymbol2(units)}` : ''}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p className="text-White text8x1 mb-2">UV Index</p>
+                    <p className="text-white text-3xl">{weatherData.feels_like ? `${weatherData.feels_like}°${getUnitSymbol(units)}` : ''}</p>
+                  </div>
+                </div>
             </div>
         </div>
 
