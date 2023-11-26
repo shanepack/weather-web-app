@@ -14,11 +14,24 @@ def send_location():
 
     api_key = "03f11aa770bb749257a45573c2754aa1"
     URL = f'http://api.openweathermap.org/data/2.5/weather?q={user_location}&units={units}&appid={api_key}'
+    HOURLY_URL = f'http://api.openweathermap.org/data/2.5/forecast?q={user_location}&units={units}&appid={api_key}'
 
     response = requests.get(url=URL)
+    response_hourly = requests.get(url=HOURLY_URL)
 
-    if response.status_code == 200:
+    if response.status_code == 200 and response_hourly.status_code == 200:
         weather_data = response.json()
+        weather_data_hourly = response_hourly.json()
+        
+        # Get the UTC datetime and timezone offset
+        dt_utc = datetime.utcfromtimestamp(weather_data.get("dt"))
+        timezone_offset = timedelta(seconds=weather_data.get("timezone"))
+        # Convert UTC datetime to local time
+        local_time = dt_utc + timezone_offset
+        # Convert UTC datetime to local time and format it in ISO 8601
+        local_time_iso = (dt_utc + timezone_offset).isoformat()
+
+        # Defauly data
         city = weather_data.get("name")
         temp = weather_data.get("main", {}).get("temp")
         description = weather_data.get("weather", [{}])[0].get("description", "")
@@ -33,13 +46,12 @@ def send_location():
         lat = weather_data.get("coord", {}).get("lat")
         lon = weather_data.get("coord", {}).get("lon")
 
-        # Get the UTC datetime and timezone offset
-        dt_utc = datetime.utcfromtimestamp(weather_data.get("dt"))
-        timezone_offset = timedelta(seconds=weather_data.get("timezone"))
-        # Convert UTC datetime to local time
-        local_time = dt_utc + timezone_offset
-        # Convert UTC datetime to local time and format it in ISO 8601
-        local_time_iso = (dt_utc + timezone_offset).isoformat()
+        # Hourly data
+        hourly_data = []
+        for i in weather_data_hourly.get('list', [])[:6]: #Fetching the 'hourly' temp up to 6 hours
+            hourly_temp = round(i.get('main', {}).get('temp', 0))
+            hourly_time = (local_time + timedelta(seconds=i.get('dt'))).strftime('%I %p') # Rounded temp added in 'temp = []'
+            hourly_data.append({'temp': hourly_temp, 'time': hourly_time})
 
     else:
         city = "N/A"
@@ -53,6 +65,9 @@ def send_location():
         feels_like = "N/A"
         wind = "N/A"
 
+        # Hourly
+        hourly_data = []
+
     return jsonify({
         'city': city,
         'temp': temp,
@@ -61,7 +76,8 @@ def send_location():
         'feels_like': feels_like,
         'wind': wind,
         'temp_high': temp_high,
-        'temp_low': temp_low
+        'temp_low': temp_low,
+        'hourly_data': hourly_data
     })
 
 if __name__ == '__main__':
