@@ -13,13 +13,14 @@ type WeatherData = {
   temp_high: string;
   temp_low: string;
   hourly_data: {temp: string; time: string }[];
+  week_data: {week_temp_high: string; week_temp_low: string; week_time: string }[];
 };
 
 // The main component for the weather app page
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
-  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined, feels_like: '', wind: '', temp_high: '', temp_low: '', hourly_data: []});
+  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined, feels_like: '', wind: '', temp_high: '', temp_low: '', hourly_data: [], week_data: []});
   const [previousLocations, setPreviousLocations] = useState<string[]>([]);
   const [showHome, setHomePage] = useState(true);
   const [showList, setListPage] = useState(false);
@@ -53,6 +54,11 @@ export default function RectanglePage() {
         temp: Math.round(hourlyEntry.temp).toString(),
         time: hourlyEntry.time,
       }));
+      const weekData = response.data.week_data.map((weekEntry: { week_temp_high: number; week_temp_low: number; week_time: string}) => ({
+        week_temp_high: Math.round(weekEntry.week_temp_high).toString(),
+        week_temp_low: Math.round(weekEntry.week_temp_low).toString(),
+        time: weekEntry.week_time,
+      }))
       setWeatherData((currentData) => {
         return {
           ...currentData, // Spread operator to copy all current weatherData state values
@@ -65,6 +71,7 @@ export default function RectanglePage() {
           temp_high: roundedTemp_High.toString(),
           temp_low: roundedTemp_Low.toString(),
           hourly_data: hourlyData,
+          week_data: weekData,
         };
       });
     } catch (error) {
@@ -171,6 +178,7 @@ export default function RectanglePage() {
             placeholder="Search for a City..."
             className="p-2 bg-gray-700 rounded-[20px] text-white focus:outline-none focus:border-white"
             onKeyDown={handleKeyDown}
+            ref={locationInputRef}
           />
           <p className="text-white text-2xl">8:00PM</p>
         </div>
@@ -281,6 +289,17 @@ export default function RectanglePage() {
             {/* 7 Day Forecast */}
             <div className="bg-gray-700 p-8 rounded-[20px] min-h-[300px]"> {/* Use the desired value in place of 300px */}
               <p className="text-white text-2xl">7 DAY FORECAST</p>
+              <div className="grid grid-cols-6 gap-8">
+                <div className="flex flex-col items-center">
+                  {weatherData.week_data.slice(0,1).map((weekEntry, index) => (
+                  <div key={index}>
+                    {/* <p className="text-white text-2xl">{weekEntry.week_time}</p> */}
+                    <p className="text-white text-2xl">High: {weekEntry.week_temp_high}°{getUnitSymbol(units)}</p>
+                    <p className="text-white text-2xl">Low: {weekEntry.week_temp_low}°{getUnitSymbol(units)}</p>
+                  </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

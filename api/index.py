@@ -11,17 +11,25 @@ def send_location():
     data = request.get_json()
     user_location = data.get('userLocation', 'Houston')  # Default to 'Houston' if no location is provided
     units = data.get('units', 'imperial')  # Default to 'imperial' if no unit is provided
+    part = "minutely"
 
     api_key = "03f11aa770bb749257a45573c2754aa1"
     URL = f'http://api.openweathermap.org/data/2.5/weather?q={user_location}&units={units}&appid={api_key}'
     HOURLY_URL = f'http://api.openweathermap.org/data/2.5/forecast?q={user_location}&units={units}&appid={api_key}'
+    WEEk_URL = f'https://api.openweathermap.org/data/2.5/forecast/daily?q={user_location}&units={units}&exclude={part}&appid={api_key}'
 
     response = requests.get(url=URL)
     response_hourly = requests.get(url=HOURLY_URL)
+    response_week = requests.get(url=WEEk_URL)
+
+    print('Weather API response:', response.json())
+    print('Hourly API response:', response_hourly.json())
+    print('Week API response:', response_week.json())
 
     if response.status_code == 200 and response_hourly.status_code == 200:
         weather_data = response.json()
         weather_data_hourly = response_hourly.json()
+        weather_data_week = response_week.json()
         
         # Get the UTC datetime and timezone offset
         dt_utc = datetime.utcfromtimestamp(weather_data.get("dt"))
@@ -53,6 +61,14 @@ def send_location():
             hourly_time = (local_time + timedelta(seconds=i.get('dt'))).strftime('%I %p') # Rounded temp added in 'temp = []'
             hourly_data.append({'temp': hourly_temp, 'time': hourly_time})
 
+        # Week data
+        week_data = []
+        for i in weather_data_week.get('daily', [])[:7]:
+            week_temp_high = round(i.get('temp', {}).get('max', 0))
+            week_temp_low = round(i.get('temp', {}).get('min', 0))
+            week_time = (local_time + timedelta(seconds=i.get('dt'))).strftime('%I %p')
+            week_data.append({'week_temp_high': week_temp_high, 'week_temp_low': week_temp_low, 'week_time': week_time})
+
     else:
         city = "N/A"
         temp = "N/A"
@@ -68,6 +84,9 @@ def send_location():
         # Hourly
         hourly_data = []
 
+        # Week
+        week_data = []
+
     return jsonify({
         'city': city,
         'temp': temp,
@@ -77,7 +96,8 @@ def send_location():
         'wind': wind,
         'temp_high': temp_high,
         'temp_low': temp_low,
-        'hourly_data': hourly_data
+        'hourly_data': hourly_data,
+        'week_data': week_data
     })
 
 if __name__ == '__main__':
