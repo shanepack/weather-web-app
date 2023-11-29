@@ -1,0 +1,13 @@
+import matplotlib.pyplot as plt
+
+colors = ['#9370DB', '#D8BFD8', '#CCCCFF', '#4B0082', '#C6C3C7', '#FFD700']
+names = ['Medium Purple', 'Soft Lavender', 'Light Periwinkle', 'Dark Purple', 'Pale Silver', 'Golden Pop']
+
+plt.figure(figsize=(8, 6))
+for sp in range(6):
+    plt.subplot(1, 6, sp + 1)
+    plt.fill_between([0, 10], 0, 10, color=colors[sp])
+    plt.text(5, 5, names[sp], ha='center', va='center', fontsize=10, color='black' if sp != 3 else 'white')
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
