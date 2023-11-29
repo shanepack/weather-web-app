@@ -2,6 +2,7 @@
 "use client";
 // Import necessary hooks and axios for API requests
 import { useState, useEffect, useRef } from 'react';
+import { format, isToday, parseISO } from 'date-fns'
 import axios from 'axios';
 
 // Define the structure for the weather data
@@ -10,13 +11,24 @@ type WeatherData = {
   temp: string;
   description: string;
   local_time?: string;
+  forecast: Array<{
+    date: string;
+    temp: number;
+    rain_chance: number;
+  }>;
 };
 
 // The main component for the weather app page
 export default function RectanglePage() {
    // State hooks for various aspects of the app
   const [userLocation, setUserLocation] = useState('Pearland');
-  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined });
+  const [weatherData, setWeatherData] = useState<WeatherData>({
+    city: '',
+    temp: '',
+    description: '',
+    local_time: undefined,
+    forecast: [] // Initialize forecast as an empty array
+  });
   const [previousLocations, setPreviousLocations] = useState<string[]>([]);
   const [showHome, setHomePage] = useState(true);
   const [showList, setListPage] = useState(false);
@@ -49,6 +61,7 @@ export default function RectanglePage() {
           city: response.data.city,
           temp: roundedTemp.toString(), // Convert back to string if needed
           description: response.data.description,
+          forecast: response.data.forecast,
           // Only update the time if updateTime is true
           local_time: updateTime ? response.data.local_time : currentData.local_time,
         };
@@ -195,13 +208,32 @@ export default function RectanglePage() {
               </p>
             </div>
 
-            {/* 7 Day Forecast */}
-            <div className="bg-gray-700 p-8 rounded-[20px] min-h-[300px]"> {/* Use the desired value in place of 300px */}
-              <p className="text-white text-2xl">7 DAY FORECAST</p>
+              {/* 7 Day Forecast */}
+              <div className="bg-gray-700 p-8 rounded-[20px]">
+                <p className="text-white text-2xl mb-4">7 DAY FORECAST</p>
+                <div className="grid grid-cols-7 gap-2">
+                  {weatherData.forecast && weatherData.forecast.length > 0 ? (
+                    weatherData.forecast.map((day, index) => {
+                      const dayDate = parseISO(day.date);
+                      const displayDate = isToday(dayDate) ? 'Today' : format(dayDate, 'EEE');
+
+                      return (
+                        <div key={index} className="text-white">
+                          <p>{displayDate}</p>
+                          <p>{Math.round(day.temp)}°{getUnitSymbol(units)}</p>
+                          <p>Rain: {Math.round(day.rain_chance)}%</p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-white">Loading forecast...</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+
       )}
 
       {/* List Page */}
