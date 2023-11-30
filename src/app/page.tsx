@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import { format, isToday, parseISO } from 'date-fns'
 import axios from 'axios';
 
 // Define the structure for the weather data
@@ -10,17 +11,23 @@ type WeatherData = {
   local_time?: string;
   feels_like: string;
   wind: string;
+  uv: string;
+  rain_percent: string;
   temp_high: string;
   temp_low: string;
-  hourly_data: {temp: string; time: string }[];
-  week_data: {week_temp_high: string; week_temp_low: string; week_time: string }[];
+  hourly_data: {temp: string; time: string}[];
+  forecast: Array<{
+    date: string;
+    temp: number;
+    rain_chance: number;
+  }>;
 };
 
 // The main component for the weather app page
 export default function RectanglePage() {
   
   const [userLocation, setUserLocation] = useState('Pearland');
-  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined, feels_like: '', wind: '', temp_high: '', temp_low: '', hourly_data: [], week_data: []});
+  const [weatherData, setWeatherData] = useState({ city: '', temp: '', description: '', local_time: undefined, feels_like: '', wind: '', uv: '', rain_percent: '', temp_high: '', temp_low: '', hourly_data: [], forecast: []});
   const [previousLocations, setPreviousLocations] = useState<string[]>([]);
   const [showHome, setHomePage] = useState(true);
   const [showList, setListPage] = useState(false);
@@ -54,11 +61,6 @@ export default function RectanglePage() {
         temp: Math.round(hourlyEntry.temp).toString(),
         time: hourlyEntry.time,
       }));
-      const weekData = response.data.week_data.map((weekEntry: { week_temp_high: number; week_temp_low: number; week_time: string}) => ({
-        week_temp_high: Math.round(weekEntry.week_temp_high).toString(),
-        week_temp_low: Math.round(weekEntry.week_temp_low).toString(),
-        time: weekEntry.week_time,
-      }))
       setWeatherData((currentData) => {
         return {
           ...currentData, // Spread operator to copy all current weatherData state values
@@ -68,10 +70,12 @@ export default function RectanglePage() {
           local_time: updateTime ? response.data.local_time : currentData.local_time, // Only update the time if updateTime is true
           feels_like: roundedFeels_Like.toString(),
           wind: response.data.wind,
+          uv: response.data.uv,
+          rain_percent: response.data.rain_percent,
           temp_high: roundedTemp_High.toString(),
           temp_low: roundedTemp_Low.toString(),
           hourly_data: hourlyData,
-          week_data: weekData,
+          forecast: response.data.forecast,
         };
       });
     } catch (error) {
@@ -196,56 +200,18 @@ export default function RectanglePage() {
                 </div>
 
                 <div className="bg-[#0C1117] p-8 rounded-[20px]">
-                    <p className="text-white text-2xl mb-2">TODAY'S FORECAST</p>
+                    <p className="text-white text-2xl mb-4">TODAY'S FORECAST</p>
                     <div className="grid grid-cols-6 gap-8">
-                      <div className="flex flex-col items-center">
-                        {weatherData.hourly_data.slice(0,1).map((hourlyEntry, index) => (
-                        <div key={index}>
-                          <p className="text-white text-2xl">{hourlyEntry.time}</p>
-                          <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
-                        </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-col items-center">
-                        {weatherData.hourly_data.slice(1,2).map((hourlyEntry, index) => (
-                        <div key={index}>
-                          <p className="text-white text-2xl">{hourlyEntry.time}</p>
-                          <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
-                        </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-col items-center">
-                        {weatherData.hourly_data.slice(2,3).map((hourlyEntry, index) => (
-                        <div key={index}>
-                          <p className="text-white text-2xl">{hourlyEntry.time}</p>
-                          <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
-                        </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-col items-center">
-                        {weatherData.hourly_data.slice(3,4).map((hourlyEntry, index) => (
-                        <div key={index}>
-                          <p className="text-white text-2xl">{hourlyEntry.time}</p>
-                          <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
-                        </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-col items-center">
-                        {weatherData.hourly_data.slice(4,5).map((hourlyEntry, index) => (
-                        <div key={index}>
-                          <p className="text-white text-2xl">{hourlyEntry.time}</p>
-                          <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
-                        </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-col items-center">
-                        {weatherData.hourly_data.slice(5,6).map((hourlyEntry, index) => (
-                        <div key={index}>
-                          <p className="text-white text-2xl">{hourlyEntry.time}</p>
-                          <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
-                        </div>
-                        ))}
-                      </div>
+                      {weatherData.hourly_data.length > 0 ? (
+                        weatherData.hourly_data.map((hourlyEntry: { temp: string; time: string }, index) => (
+                          <div key={index} className="flex flex-col items-center">
+                            <p className="text-white text-2xl">{hourlyEntry.time}</p>
+                            <p className="text-white text-2xl">{hourlyEntry.temp}°{getUnitSymbol(units)}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-white">Hourly data not available</p>
+                      )}
                     </div>
                 </div>
             </div>
@@ -260,7 +226,7 @@ export default function RectanglePage() {
                   </div>
                   <div className="flex flex-col items-center">
                     <p className="text-White text8x1 mb-2">Change of Rain</p>
-                    <p className="text-white text-3xl">{weatherData.feels_like ? `${weatherData.feels_like}°${getUnitSymbol(units)}` : ''}</p>
+                    <p className="text-white text-3xl">{weatherData.rain_percent ? `${weatherData.rain_percent}` : 'N/A'}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <p className="text-White text8x1 mb-2">Wind</p>
@@ -268,7 +234,7 @@ export default function RectanglePage() {
                   </div>
                   <div className="flex flex-col items-center">
                     <p className="text-White text8x1 mb-2">UV Index</p>
-                    <p className="text-white text-3xl">{weatherData.feels_like ? `${weatherData.feels_like}°${getUnitSymbol(units)}` : ''}</p>
+                    <p className="text-white text-3xl">{weatherData.uv ? `${weatherData.uv}` : 'N/A'}</p>
                   </div>
                 </div>
             </div>
@@ -288,17 +254,26 @@ export default function RectanglePage() {
 
             {/* 7 Day Forecast */}
             <div className="bg-gray-700 p-8 rounded-[20px] min-h-[300px]"> {/* Use the desired value in place of 300px */}
-              <p className="text-white text-2xl">7 DAY FORECAST</p>
-              <div className="grid grid-cols-6 gap-8">
-                <div className="flex flex-col items-center">
-                  {weatherData.week_data.slice(0,1).map((weekEntry, index) => (
-                  <div key={index}>
-                    {/* <p className="text-white text-2xl">{weekEntry.week_time}</p> */}
-                    <p className="text-white text-2xl">High: {weekEntry.week_temp_high}°{getUnitSymbol(units)}</p>
-                    <p className="text-white text-2xl">Low: {weekEntry.week_temp_low}°{getUnitSymbol(units)}</p>
-                  </div>
-                  ))}
-                </div>
+              <p className="text-white text-2xl mb-6">7 DAY FORECAST</p>
+              <div className="grid grid-cols-7 gap-8">
+                {/* <div className="flex flex-col items-center"> */}
+                  {weatherData.forecast && weatherData.forecast.length > 0 ? (
+                    weatherData.forecast.map((day: { date: string; rain_chance: number; temp: number }, index) => {
+                      const dayDate = parseISO(day.date);
+                      const displayDate = isToday(dayDate) ? 'Today' : format(dayDate, 'EEE');
+
+                      return (
+                        <div key={index} className="text-white">
+                          <p>{displayDate}</p>
+                          <p>{Math.round(day.temp)}°{getUnitSymbol(units)}</p>
+                          <p>Rain: {Math.round(day.rain_chance)}%</p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-white">Loading forecast...</p>
+                  )}
+                {/* </div> */}
               </div>
             </div>
           </div>
