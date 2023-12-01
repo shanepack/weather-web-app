@@ -38,7 +38,7 @@ def send_location():
     # If coordinates are available, use the onecall API for the 7-day forecast
     if coords:
         lat, lon = coords.get("lat"), coords.get("lon")
-        onecall_URL = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly,alerts&units={units}&appid={api_key}'
+        onecall_URL = f'https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly,alerts&units={units}&appid={openweather_api_key}'
         onecall_response = requests.get(url=onecall_URL)
         if onecall_response.ok:
             onecall_data = onecall_response.json()
@@ -63,6 +63,28 @@ def process_forecast_data(daily_forecast):
             'rain_chance': day.get('pop', 0) * 100
         } for day in daily_forecast
     ]
+
+@app.route('/api/chatgpt', methods=['POST'])
+def chatgptResponse():
+    input = request.get_json()
+    print("Received data: ", input)
+    messages = []
+    question = {}
+    question['role'] = 'user'
+    question['content'] = input['prompt']
+    messages.append(question)
+
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages
+    )
+
+    try:
+        answer = completion['choices'][0]['message']['content'].replace('\n', '<br>')
+    except: 
+        answer = 'Oops error encountered'
+    return jsonify({'text': answer}), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5328, debug=True)
