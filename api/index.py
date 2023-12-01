@@ -3,6 +3,7 @@ from flask_cors import CORS
 from datetime import datetime
 import requests
 import json
+import openai 
 
 def load_api_keys(secrets_file="../../weather-web-app/secrets.json"):
     with open(secrets_file) as f:
@@ -11,6 +12,7 @@ def load_api_keys(secrets_file="../../weather-web-app/secrets.json"):
 
 api_keys = load_api_keys()
 openweather_api_key = api_keys['OPENWEATHER_API_KEY']
+openai.api_key = api_keys['OPENAI_API_KEY']
 
 app = Flask(__name__)
 CORS(app)
