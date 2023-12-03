@@ -31,6 +31,7 @@ def send_location():
 
     weather_data = weather_response.json()
     city = weather_data.get("name", "N/A")
+    # user_city = city
     temp = weather_data.get("main", {}).get("temp", "N/A")
     description = weather_data.get("weather", [{}])[0].get("description", "N/A")
     coords = weather_data.get("coord", {})
@@ -52,7 +53,7 @@ def send_location():
         'city': city,
         'temp': temp,
         'description': description,
-        'forecast': forecast_data
+        'forecast': forecast_data,
     })
 
 def process_forecast_data(daily_forecast):
@@ -70,9 +71,12 @@ def chatgptResponse():
     print("Received data: ", input)
     messages = []
     question = {}
+    user_city = input.get('user_city', '')
     question['role'] = 'user'
-    question['content'] = input['prompt']
+    question['content'] = f"what can i do in {user_city} based on the weather today"
     messages.append(question)
+
+    print('backend user_city: ', user_city)
 
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -80,7 +84,8 @@ def chatgptResponse():
     )
 
     try:
-        answer = completion['choices'][0]['message']['content'].replace('\n', '<br>')
+        answer = completion['choices'][0]['message']['content'].split('\n')[0].strip()
+        print(answer)
     except: 
         answer = 'Oops error encountered'
     return jsonify({'text': answer}), 200
