@@ -28,16 +28,13 @@ const ChatGPT: React.FC<ChatGPTProps> = ({ user_city }) => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="input">Input:</label>
-                <input
-                    type="text"
-                    id="input"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                />
-                <button type="submit">Submit</button>
+        <div className="flex flex-col items-start">
+            <form onSubmit={handleSubmit} className="mb-2">
+                <button 
+                    type="submit" 
+                    className="font-bold text-xl">
+                    Generate
+                </button>
             </form>
             <div>
                 <p>{response}</p>
